@@ -62,7 +62,7 @@ const indefinido = setInterval(() => {
     bola.top = (bola.top + (Math.random() * 3 * (Math.random() == 1 ? -1 : 1))) % 256;
     let punto = {jugador: "white", partida: "1", x: bola.left, y: bola.top};
         notificar(punto);
-    }, 1000/60);
+    }, 1000/20);
 
 
 app.listen(app.get('port'), () => console.log(`Swamp Events service listening on port 3000`));
