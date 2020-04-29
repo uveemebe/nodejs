@@ -28,8 +28,8 @@
         $(document).ready(function() {
             let bola = null
             let socket = io.connect('https://sheltered-citadel-03188.herokuapp.com/', { 'forceNew': true });
+            //let socket = io.connect('http://localhost:5000/', { 'forceNew': true });
             socket.on('puntos', function(data) {
-                console.log(data);
                 data.forEach((punto) => {
                     let divPunto = $('div.punto.' + punto.jugador);
                     if (divPunto.length == 0) {

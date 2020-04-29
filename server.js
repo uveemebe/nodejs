@@ -25,6 +25,7 @@ io.on('connection', function(socket) {
 
     socket.emit('puntos', puntos);
     socket.on('punto', function(punto) {
+        console.log(`Punto: ${punto}`);
         puntos = puntos.filter(p => (p.jugador !== punto.jugador || p.partida !== punto.partida));
         puntos.push(punto);
         io.sockets.emit('puntos', [punto]);
