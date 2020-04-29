@@ -37,11 +37,19 @@
                 let punto = $('div.punto.' + urlParams.get("jugador"));
                 let left = parseInt(punto.css("left").replace("px"));
                 let top = parseInt(punto.css("top").replace("px"));
-                if (event.which == 37) {
-                    mover(urlParams.get("jugador"), left-8, top);
-                }
-                else if (event.which == 39) {
-                    mover(urlParams.get("jugador"), left+8, top);
+                switch(event.which) {
+                    case 37:
+                        mover(urlParams.get("jugador"), left-8, top);
+                        break;
+                    case 38:
+                        mover(urlParams.get("jugador"), left, top-8);
+                        break;
+                    case 39:
+                        mover(urlParams.get("jugador"), left+8, top);
+                        break;
+                    case 40:
+                        mover(urlParams.get("jugador"), left, top+8);
+                        break;
                 }
             });
 
