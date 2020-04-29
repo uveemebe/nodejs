@@ -14,7 +14,7 @@ app.use(express.static('public'));
 
 let sesiones = [];
 let puntos = [];
-let bola = {left: 128, top: 128};
+let bola = {left: 128, top: 0};
 
 // Definimos las URL relativas que atiende nuestra aplicación y la función que procesa cada petición
 app.get('/eventos', eventos);
@@ -58,10 +58,12 @@ function notificar(punto) {
 
 // Función que se ejecuta de forma indefinida cada 1000/60 milisegundos
 const indefinido = setInterval(() => {
-    bola.left = (bola.left + (Math.random() * 4 * (Math.random() == 1 ? -1 : 1))) % 256;
-    bola.top = (bola.top + (Math.random() * 4 * (Math.random() == 1 ? -1 : 1))) % 256;
-    let punto = {jugador: "white", partida: "1", x: bola.left, y: bola.top};
+    bola.top = bola.top + 4;
+    if (bola.top > 256) {
+        bola.top = 0;
+        let punto = {jugador: "white", partida: "1", x: bola.left, y: bola.top};
         notificar(punto);
+    }
     }, 1000/60);
 
 
