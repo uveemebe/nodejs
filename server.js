@@ -8,6 +8,7 @@ const io = require('socket.io')(server);
 app.set('port', process.env.PORT || 5000);
 app.use(express.static('public'));
 
+let data = null;
 let puntos = [];
 let bola = {jugador: "white", x: 128, y: 0};
 
