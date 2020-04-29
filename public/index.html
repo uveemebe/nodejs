@@ -25,14 +25,18 @@
     <div class="cuadrado"></div>
     <script>
         var evtSource = new EventSource('/eventos');
-        $(document).ready(function(){
+        $(document).ready(function() {
+
+            let mover = async function(jugador, partida, x, y) {
+                $.post("/mover", {jugador: jugador, partida: partida, x: x, y: y});
+            }
+
             let cuadrado = $('div.cuadrado');
             let urlParams = new URLSearchParams(window.location.search);
 
             cuadrado.on("click", (e) => {
                 let offset = cuadrado.offset();
-                $.post("/mover", 
-                    {jugador: urlParams.get("jugador"), partida: urlParams.get("partida"), x: e.pageX - offset.left, y: e.pageY - offset.top});
+                mover(urlParams.get("jugador"), urlParams.get("partida"), e.pageX - offset.left, e.pageY - offset.top);
             });
 
             $(document).keydown((event) => {
@@ -40,16 +44,10 @@
                 let left = parseInt(punto.css("left").replace("px"));
                 let top = parseInt(punto.css("top").replace("px"));
                 if (event.which == 37) {
-                    punto.css("left", left-8 + "px");
-                    punto.css("top", top + "px");
-                    $.post("/mover", 
-                        {jugador: urlParams.get("jugador"), partida: urlParams.get("partida"), x: left-8, y: top});
+                    mover(urlParams.get("jugador"), urlParams.get("partida"), left-8, top);
                 }
                 else if (event.which == 39) {
-                    punto.css("left", left+8 + "px");
-                    punto.css("top", top + "px");
-                    $.post("/mover", 
-                        {jugador: urlParams.get("jugador"), partida: urlParams.get("partida"), x: left+8, y: top});
+                    mover(urlParams.get("jugador"), urlParams.get("partida"), left+8, top);
                 }
             });
             
