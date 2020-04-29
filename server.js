@@ -19,7 +19,6 @@ io.on('connection', function(socket) {
 
     socket.emit('puntos', puntos);
     socket.on('punto', function(punto) {
-        console.log(`Punto: ${punto}`);
         puntos = puntos.filter(p => (p.jugador !== punto.jugador || p.partida !== punto.partida));
         puntos.push(punto);
         socket.broadcast.emit('puntos', [punto]);
@@ -35,10 +34,10 @@ const indefinido = setInterval(() => {
     bola.top = bola.top + 4;
     if (bola.top > 256) {
         bola.top = 0;
-        let punto = {jugador: "white", partida: "1", x: bola.left, y: bola.top};
-        io.sockets.emit('puntos', [punto]);
     }
-    }, 1000/60);
+    let punto = {jugador: "white", partida: "1", x: bola.left, y: bola.top};
+    io.sockets.emit('puntos', [punto]);
+}, 1000/60);
 
 
 server.listen(app.get('port'), () => console.log(`Escuchando de ${app.get('port')}`));
