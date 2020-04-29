@@ -27,8 +27,7 @@
     <script>
         $(document).ready(function() {
             let bola = null
-            let socket = io.connect('https://sheltered-citadel-03188.herokuapp.com/', { 'forceNew': true });
-            //let socket = io.connect('http://localhost:5000/', { 'forceNew': true });
+            let socket = io();
             socket.on('puntos', function(data) {
                 data.forEach((punto) => {
                     let divPunto = $('div.punto.' + punto.jugador);
@@ -50,7 +49,7 @@
                 });
             })
 
-            let mover = async function(jugador, partida, x, y) {
+            let mover = function(jugador, partida, x, y) {
                 socket.emit('punto', {jugador: jugador, partida: partida, x: x, y: y});
             }
 
