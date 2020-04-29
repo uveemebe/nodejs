@@ -58,11 +58,11 @@ function notificar(punto) {
 
 // Función que se ejecuta de forma indefinida cada 1000/60 milisegundos
 const indefinido = setInterval(() => {
-    bola.left = (bola.left + (Math.random() * 3 * (Math.random() == 1 ? -1 : 1))) % 256;
-    bola.top = (bola.top + (Math.random() * 3 * (Math.random() == 1 ? -1 : 1))) % 256;
+    bola.left = (bola.left + (Math.random() * 8 * (Math.random() == 1 ? -1 : 1))) % 256;
+    bola.top = (bola.top + (Math.random() * 8 * (Math.random() == 1 ? -1 : 1))) % 256;
     let punto = {jugador: "white", partida: "1", x: bola.left, y: bola.top};
         notificar(punto);
-    }, 1000/20);
+    }, 1000/60);
 
 
 app.listen(app.get('port'), () => console.log(`Swamp Events service listening on port 3000`));
