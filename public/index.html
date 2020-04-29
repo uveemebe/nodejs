@@ -41,11 +41,11 @@
                 let top = parseInt(punto.css("top").replace("px"));
                 if (event.which == 37) {
                         $.post("/mover", 
-                            {jugador: urlParams.get("jugador"), partida: urlParams.get("partida"), x: left-8, y: top});
+                            {jugador: urlParams.get("jugador"), partida: urlParams.get("partida"), x: left-16, y: top});
                     }
                     else if (event.which == 39) {
                         $.post("/mover", 
-                            {jugador: urlParams.get("jugador"), partida: urlParams.get("partida"), x: left+8, y: top});
+                            {jugador: urlParams.get("jugador"), partida: urlParams.get("partida"), x: left+16, y: top});
                     }
             });
                 
