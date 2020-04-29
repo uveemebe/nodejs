@@ -23,12 +23,35 @@
 </head>
 <body>
     <div class="cuadrado"></div>
+    <script src="/socket.io/socket.io.js"></script>
     <script>
-        var evtSource = new EventSource('/eventos');
         $(document).ready(function() {
+            let bola = null
+            let socket = io.connect('http://localhost:5000/', { 'forceNew': true });
+            socket.on('puntos', function(data) {
+                console.log(data);
+                data.forEach((punto) => {
+                    let divPunto = $('div.punto.' + punto.jugador);
+                    if (divPunto.length == 0) {
+                        cuadrado.append("<div class='punto {jugador}' />".replace("{jugador}", punto.jugador));
+                        divPunto = $('div.punto.' + punto.jugador);
+                        divPunto.css("background-color", punto.jugador);
+                    }
+                    divPunto.css("left", punto.x + "px");
+                    divPunto.css("top", punto.y + "px");
+                    if (punto.jugador == "white") {
+                        clearTimeout(bola);
+                        bola = setInterval(() => {
+                            let puntoBlanco = $('div.punto.white');
+                            let top = parseInt(puntoBlanco.css("top").replace("px"));
+                            puntoBlanco.css("top", "" + (top + 4) + "px");
+                        }, 1000/60)
+                    }
+                });
+            })
 
             let mover = async function(jugador, partida, x, y) {
-                $.post("/mover", {jugador: jugador, partida: partida, x: x, y: y});
+                socket.emit('punto', {jugador: jugador, partida: partida, x: x, y: y});
             }
 
             let cuadrado = $('div.cuadrado');
@@ -51,32 +74,6 @@
                 }
             });
             
-            let bola = null;
-
-            evtSource.onopen = function(e) {console.log("open")};
-            evtSource.onerror = function(e) {console.error(e)};
-            evtSource.onmessage = function(e) {
-                const datos = JSON.parse(e.data);
-                console.log(datos);
-                datos.forEach((punto) => {
-                    let divPunto = $('div.punto.' + punto.jugador);
-                    if (divPunto.length == 0) {
-                        cuadrado.append("<div class='punto {jugador}' />".replace("{jugador}", punto.jugador));
-                        divPunto = $('div.punto.' + punto.jugador);
-                        divPunto.css("background-color", punto.jugador);
-                    }
-                    divPunto.css("left", punto.x + "px");
-                    divPunto.css("top", punto.y + "px");
-                    if (punto.jugador == "white") {
-                        clearTimeout(bola);
-                        bola = setInterval(() => {
-                            let puntoBlanco = $('div.punto.white');
-                            let top = parseInt(puntoBlanco.css("top").replace("px"));
-                            puntoBlanco.css("top", "" + (top + 4) + "px");
-                        }, 1000/60)
-                    }
-                });
-            }
         });
     </script>
 </body>
