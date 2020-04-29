@@ -26,7 +26,37 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
         $(document).ready(function() {
-            let bola = null
+            let cuadrado = $('div.cuadrado');
+
+            let urlParams = new URLSearchParams(window.location.search);
+            cuadrado.on("click", (e) => {
+                let offset = cuadrado.offset();
+                mover(urlParams.get("jugador"), e.pageX - offset.left, e.pageY - offset.top);
+            });
+            $(document).keydown((event) => {
+                let punto = $('div.punto.' + urlParams.get("jugador"));
+                let left = parseInt(punto.css("left").replace("px"));
+                let top = parseInt(punto.css("top").replace("px"));
+                if (event.which == 37) {
+                    mover(urlParams.get("jugador"), left-8, top);
+                }
+                else if (event.which == 39) {
+                    mover(urlParams.get("jugador"), left+8, top);
+                }
+            });
+
+            let socket = io();
+            socket.on('puntos', function(data) {
+                data.forEach((punto) => {
+                    pintar(punto);
+                });
+            })
+
+            let mover = function(jugador, x, y) {
+                let punto = {jugador: jugador, x: x, y: y};
+                pintar(punto);
+                socket.emit('punto', punto);
+            }
 
             let pintar = (punto) => {
                 let divPunto = $('div.punto.' + punto.jugador);
@@ -37,48 +67,7 @@
                 }
                 divPunto.css("left", punto.x + "px");
                 divPunto.css("top", punto.y + "px");
-                if (punto.jugador == "white") {
-                    clearTimeout(bola);
-                    bola = setInterval(() => {
-                        let puntoBlanco = $('div.punto.white');
-                        let top = parseInt(puntoBlanco.css("top").replace("px"));
-                        puntoBlanco.css("top", "" + (top + 4) + "px");
-                    }, 1000/60)
-                }
             }
-
-            let socket = io();
-            socket.on('puntos', function(data) {
-                data.forEach((punto) => {
-                    pintar(punto);
-                });
-            })
-
-            let mover = function(jugador, partida, x, y) {
-                let punto = {jugador: jugador, partida: partida, x: x, y: y};
-                pintar(punto);
-                socket.emit('punto', punto);
-            }
-
-            let cuadrado = $('div.cuadrado');
-            let urlParams = new URLSearchParams(window.location.search);
-
-            cuadrado.on("click", (e) => {
-                let offset = cuadrado.offset();
-                mover(urlParams.get("jugador"), urlParams.get("partida"), e.pageX - offset.left, e.pageY - offset.top);
-            });
-
-            $(document).keydown((event) => {
-                let punto = $('div.punto.' + urlParams.get("jugador"));
-                let left = parseInt(punto.css("left").replace("px"));
-                let top = parseInt(punto.css("top").replace("px"));
-                if (event.which == 37) {
-                    mover(urlParams.get("jugador"), urlParams.get("partida"), left-8, top);
-                }
-                else if (event.which == 39) {
-                    mover(urlParams.get("jugador"), urlParams.get("partida"), left+8, top);
-                }
-            });
             
         });
     </script>
