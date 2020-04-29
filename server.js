@@ -43,8 +43,8 @@ async function mover(request, response, next) {
     // Obtenemos los parámetros que se han pasado así "?jugador=red&partida=1&x=15&y=10" por ejemplo
     let punto = {jugador: request.body.jugador, partida: request.body.partida, x: request.body.x, y: request.body.y};
     response.json(punto);
-//    puntos = puntos.filter(p => (p.jugador !== punto.jugador || p.partida !== punto.partida));
-//    puntos.push(punto);
+    puntos = puntos.filter(p => (p.jugador !== punto.jugador || p.partida !== punto.partida));
+    puntos.push(punto);
     console.log(puntos);
     return notificar(punto);
 }
