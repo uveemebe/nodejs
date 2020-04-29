@@ -7,9 +7,11 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "express": "^4.13.1",
     "body-parser": "^1.13.2",
-    "pg": "^4.4.0"
+    "cors": "^2.8.5",
+    "express": "^4.13.1",
+    "pg": "^4.4.0",
+    "url": "^0.11.0"
   },
   "engines": {
     "node": "0.12.7"

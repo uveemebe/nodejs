@@ -1,46 +1,67 @@
-var express = require('express');
-var bodyParser = require('body-parser');
-var pg = require('pg');
+// Módulos de nodejs
+const express = require('express');
+const url = require('url');
+const bodyParser = require('body-parser');
+const cors = require('cors');
 
-var app = express();
-
-app.set('port', process.env.PORT || 5000);
-
-app.use(express.static('public'));
+// Inicializamos los módulos
+const app = express();
+app.use(cors());
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: false}));
 
-app.post('/update', function(req, res) {
-    pg.connect(process.env.DATABASE_URL, function (err, conn, done) {
-        // watch for any connect issues
-        if (err) console.log(err);
-        conn.query(
-            'UPDATE salesforce.Contact SET Phone = $1, MobilePhone = $1, HomePhone = $1 WHERE LOWER(FirstName) = LOWER($2) AND LOWER(LastName) = LOWER($3) AND LOWER(Email) = LOWER($4)',
-            [req.body.phone.trim(), req.body.firstName.trim(), req.body.lastName.trim(), req.body.email.trim()],
-            function(err, result) {
-                if (err != null || result.rowCount == 0) {
-                  conn.query('INSERT INTO salesforce.Contact (Phone, MobilePhone, FirstName, LastName, Email) VALUES ($1, $2, $3, $4, $5)',
-                  [req.body.phone.trim(), req.body.phone.trim(), req.body.firstName.trim(), req.body.lastName.trim(), req.body.email.trim()],
-                  function(err, result) {
-                    done();
-                    if (err) {
-                        res.status(400).json({error: err.message});
-                    }
-                    else {
-                        // this will still cause jquery to display 'Record updated!'
-                        // eventhough it was inserted
-                        res.json(result);
-                    }
-                  });
-                }
-                else {
-                    done();
-                    res.json(result);
-                }
-            }
-        );
+let sesiones = [];
+let puntos = [];
+let bola = {left: 128, top: 128};
+
+// Definimos las URL relativas que atiende nuestra aplicación y la función que procesa cada petición
+app.get('/eventos', eventos);
+app.post('/mover', mover);
+
+// Función a la que se llama cuando nos suscribimos a los eventos (por aquí se pasa una vez por sesión)
+function eventos(request, response, next) {
+    const headers = {'Content-Type': 'text/event-stream', 'Connection': 'keep-alive', 'Cache-Control': 'no-cache'};
+    response.writeHead(200, headers);
+
+    // Nos guardamos la sesión poniéndole un Id en función de la fecha y su response
+    const sesion = {id: Date.now(), response: response};
+    sesiones.push(sesion);
+
+    response.write(`data: ${JSON.stringify(puntos)}\n\n`)
+
+    // Eliminamos la sesión cuando el cliente se desconecta (cierra el navegador por ejemplo)
+    request.on('close', () => {
+        console.log(`${sesion.id} Connection closed`);
+        sesiones = sesiones.filter(s => s.id !== sesion.id);
     });
-});
+}
 
-app.listen(app.get('port'), function () {
-    console.log('Express server listening on port ' + app.get('port'));
-});
+// Función a la que se llama cada vez que movemos nuestro punto
+async function mover(request, response, next) {
+    // Obtenemos los parámetros que se han pasado así "?jugador=red&partida=1&x=15&y=10" por ejemplo
+    let punto = {jugador: request.body.jugador, partida: request.body.partida, x: request.body.x, y: request.body.y};
+    response.json(punto);
+    puntos = puntos.filter(p => (p.jugador !== punto.jugador || p.partida !== punto.partida));
+    puntos.push(punto);
+    console.log(puntos);
+    return notificar(punto);
+}
+
+// Función a la que llamamos cada vez que queremos notificar algo a cada sesión
+function notificar(punto) {
+    sesiones.forEach(s => {
+        s.response.write(`data: ${JSON.stringify([punto])}\n\n`)
+    });
+}
+
+// Función que se ejecuta de forma indefinida cada 1000/60 milisegundos
+const indefinido = setInterval(() => {
+    bola.left = (bola.left + (Math.random() * 3 * (Math.random() == 1 ? -1 : 1))) % 256;
+    bola.top = (bola.top + (Math.random() * 3 * (Math.random() == 1 ? -1 : 1))) % 256;
+    let punto = {jugador: "white", partida: "1", x: bola.left, y: bola.top};
+        notificar(punto);
+    }, 1000/60);
+
+
+// Start server on 3000 port
+app.listen(3000, () => console.log(`Swamp Events service listening on port 3000`));
