@@ -22,7 +22,7 @@ io.on('connection', function(socket) {
         console.log(`Punto: ${punto}`);
         puntos = puntos.filter(p => (p.jugador !== punto.jugador || p.partida !== punto.partida));
         puntos.push(punto);
-        io.sockets.emit('puntos', [punto]);
+        socket.broadcast.emit('puntos', [punto]);
     });
     socket.on('disconnect', function(data) {
         console.log(`${sesion.id} Connection closed`);
