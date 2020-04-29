@@ -1,115 +1,70 @@
 <!DOCTYPE html>
-<html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Phone Changer</title>
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-    <script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+    <meta charset="utf-8" />
+    <title>Eventos</title>
+    <script src="jquery.min.js"></script>
     <style>
-        body {
-            padding-top: 60px;
+        div.cuadrado {
+            position: relative;
+            height: 256px;
+            width: 256px;
+            background-color: lightblue;
+        }
+        div.punto {
+            left: 0px;
+            top: 0px;
+            height: 8px;
+            width: 8px;
+            position: absolute;
         }
     </style>
-    <script>
-        $(function() {
-            $("#phoneChangerForm").submit(function(event) {
-                event.preventDefault();
-
-                var errorMessage = $("#errorMessage");
-                var error = $("#error");
-                error.hide();
-
-                $("#message").hide();
-
-                var firstName = $("#firstName").val();
-                var lastName = $("#lastName").val();
-                var email = $("#email").val();
-                var phone = $("#phone").val();
-
-                if (firstName.length == 0 || lastName.length == 0 || email.length == 0 || phone.length == 0) {
-                    errorMessage.text("All of the fields are required.");
-                    error.show();
-                }
-                else {
-                    $.ajax({
-                        url: event.target.action,
-                        method: event.target.method,
-                        data: JSON.stringify({
-                            firstName: firstName,
-                            lastName: lastName,
-                            email: email,
-                            phone: phone
-                        }),
-                        contentType: "application/json; charset=utf-8",
-                        dataType: "json",
-                        success: function(data) {
-                            $("#firstName").val("");
-                            $("#lastName").val("");
-                            $("#email").val("");
-                            $("#phone").val("");
-                            $("#messageMessage").text("Record updated!");
-                            $("#message").show();
-                        },
-                        error: function(err) {
-                            errorMessage.text(err.responseJSON.error);
-                            error.show();
-                        }
-                    })
-                }
-            });
-        });
-
-    </script>
 </head>
 <body>
-    <nav class="navbar navbar-inverse navbar-fixed-top">
-        <div class="container">
-            <div class="navbar-header">
-                <a class="navbar-brand" href="/">Phone Number Changer</a>
-            </div>
-        </div>
-    </nav>
+    <div class="cuadrado"></div>
+    <script>
+        var evtSource = new EventSource('https://sheltered-citadel-03188.herokuapp.com/eventos');
+        $(document).ready(function(){
+            let cuadrado = $('div.cuadrado');
+            var urlParams = new URLSearchParams(window.location.search);
 
-    <div class="container">
-        <form id="phoneChangerForm" action="/update" method="post" style="width: 400px">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">Update Your Phone Number</h3>
-                </div>
-                <div class="panel-body">
-                    <div class="form-group">
-                        <label for="firstName">First Name</label>
-                        <input type="text" class="form-control" id="firstName" placeholder="For verification" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="lastName">Last Name</label>
-                        <input type="text" class="form-control" id="lastName" placeholder="For verification" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="email">Email</label>
-                        <input type="email" class="form-control" id="email" placeholder="For verification" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="phone">Phone</label>
-                        <input type="tel" class="form-control" id="phone" placeholder="New Phone Number" required>
-                    </div>
-                </div>
-                <div class="panel-footer">
-                    <div id="message" class="alert alert-info" role="alert" style="display: none;">
-                        <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
-                        <span id="messageMessage"></span>
-                    </div>
-                    <div id="error" class="alert alert-danger" role="alert" style="display: none;">
-                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                        <span class="sr-only">Error:</span>
-                        <span id="errorMessage"></span>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Update Phone Number</button>
-                </div>
-            </div>
-        </form>
-    </div>
+            cuadrado.on("click", (e) => {
+                let offset = cuadrado.offset();
+                $.post("https://sheltered-citadel-03188.herokuapp.com/mover", 
+                    {jugador: urlParams.get("jugador"), partida: urlParams.get("partida"), x: e.pageX - offset.left, y: e.pageY - offset.top});
+            });
+
+            $(document).keydown((event) => {
+                let punto = $('div.punto.' + urlParams.get("jugador"));
+                let left = parseInt(punto.css("left").replace("px"));
+                let top = parseInt(punto.css("top").replace("px"));
+                if (event.which == 37) {
+                        $.post("https://sheltered-citadel-03188.herokuapp.com/mover", 
+                            {jugador: urlParams.get("jugador"), partida: urlParams.get("partida"), x: left-8, y: top});
+                    }
+                    else if (event.which == 39) {
+                        $.post("https://sheltered-citadel-03188.herokuapp.com/mover", 
+                            {jugador: urlParams.get("jugador"), partida: urlParams.get("partida"), x: left+8, y: top});
+                    }
+            });
+                
+            evtSource.onopen = function(e) {console.log("open")};
+            evtSource.onerror = function(e) {console.error(e)};
+            evtSource.onmessage = function(e) {
+                const datos = JSON.parse(e.data);
+                datos.forEach((punto) => {
+                    let divPunto = $('div.punto.' + punto.jugador);
+                    if (divPunto.length == 0) {
+                        cuadrado.append("<div class='punto {jugador}' />".replace("{jugador}", punto.jugador));
+                        divPunto = $('div.punto.' + punto.jugador);
+                        divPunto.css("background-color", punto.jugador);
+                    }
+                    divPunto.css("left", punto.x + "px");
+                    divPunto.css("top", punto.y + "px");
+                });
+            }
+        });
+    </script>
 </body>
 </html>
