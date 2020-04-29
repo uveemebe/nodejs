@@ -27,7 +27,7 @@
     <script>
         $(document).ready(function() {
             let bola = null
-            let socket = io.connect('http://localhost:5000/', { 'forceNew': true });
+            let socket = io.connect('https://sheltered-citadel-03188.herokuapp.com/', { 'forceNew': true });
             socket.on('puntos', function(data) {
                 console.log(data);
                 data.forEach((punto) => {
