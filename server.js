@@ -64,5 +64,4 @@ const indefinido = setInterval(() => {
     }, 1000/60);
 
 
-// Start server on 3000 port
 app.listen(app.get('port'), () => console.log(`Swamp Events service listening on port 3000`));
