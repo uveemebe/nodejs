@@ -6,6 +6,7 @@ const cors = require('cors');
 
 // Inicializamos los módulos
 const app = express();
+app.set('port', process.env.PORT || 5000);
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
@@ -64,4 +65,4 @@ const indefinido = setInterval(() => {
 
 
 // Start server on 3000 port
-app.listen(3000, () => console.log(`Swamp Events service listening on port 3000`));
+app.listen(app.get('port'), () => console.log(`Swamp Events service listening on port 3000`));
