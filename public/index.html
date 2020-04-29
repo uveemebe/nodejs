@@ -40,13 +40,17 @@
                 let left = parseInt(punto.css("left").replace("px"));
                 let top = parseInt(punto.css("top").replace("px"));
                 if (event.which == 37) {
-                        $.post("/mover", 
-                            {jugador: urlParams.get("jugador"), partida: urlParams.get("partida"), x: left-16, y: top});
-                    }
-                    else if (event.which == 39) {
-                        $.post("/mover", 
-                            {jugador: urlParams.get("jugador"), partida: urlParams.get("partida"), x: left+16, y: top});
-                    }
+                    punto.css("left", left-8 + "px");
+                    punto.css("top", top + "px");
+                    $.post("/mover", 
+                        {jugador: urlParams.get("jugador"), partida: urlParams.get("partida"), x: left-8, y: top});
+                }
+                else if (event.which == 39) {
+                    punto.css("left", left+8 + "px");
+                    punto.css("top", top + "px");
+                    $.post("/mover", 
+                        {jugador: urlParams.get("jugador"), partida: urlParams.get("partida"), x: left+8, y: top});
+                }
             });
             
             let bola = null;
