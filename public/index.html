@@ -26,57 +26,63 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
         $(document).ready(function() {
-            let cuadrado = $('div.cuadrado');
+            const cuadrado = $('div.cuadrado');
+            const urlParams = new URLSearchParams(window.location.search);
+            const jugador = urlParams.get("jugador");
+            let miPunto = {color: jugador, x: null, y: null};
 
-            let urlParams = new URLSearchParams(window.location.search);
+            let socket = io();
+            socket.on('puntos', function(puntos) {
+                puntos.forEach((punto) => {
+                    if (punto.color == miPunto.color) {
+                        miPunto = punto;
+                    }
+                    pintar(punto);
+                });
+            });
+            socket.on('bola', function(bola) {
+                pintar(bola);
+            });
+
             cuadrado.on("click", (e) => {
                 let offset = cuadrado.offset();
-                mover(urlParams.get("jugador"), e.pageX - offset.left, e.pageY - offset.top);
+                mover(miPunto, {x: (e.pageX - offset.left), y: (e.pageY - offset.top)});
             });
+
             $(document).keydown((event) => {
-                let punto = $('div.punto.' + urlParams.get("jugador"));
-                let left = parseInt(punto.css("left").replace("px"));
-                let top = parseInt(punto.css("top").replace("px"));
                 switch(event.which) {
-                    case 37:
-                        mover(urlParams.get("jugador"), left-8, top);
-                        break;
-                    case 38:
-                        mover(urlParams.get("jugador"), left, top-8);
-                        break;
-                    case 39:
-                        mover(urlParams.get("jugador"), left+8, top);
-                        break;
-                    case 40:
-                        mover(urlParams.get("jugador"), left, top+8);
-                        break;
+                case 37:
+                    mover(miPunto, {x: miPunto.x-8, y: miPunto.y});
+                    break;
+                case 38:
+                    mover(miPunto, {x: miPunto.x, y: miPunto.y-8});
+                    break;
+                case 39:
+                    mover(miPunto, {x: miPunto.x+8, y: miPunto.y});
+                    break;
+                case 40:
+                    mover(miPunto, {x: miPunto.x, y: miPunto.y+8});
+                    break;
                 }
             });
 
-            let socket = io();
-            socket.on('puntos', function(data) {
-                data.forEach((punto) => {
-                    pintar(punto);
-                });
-            })
-
-            let mover = function(jugador, x, y) {
-                let punto = {jugador: jugador, x: x, y: y};
+            const mover = function(punto, donde) {
+                punto.x = donde.x;
+                punto.y = donde.y;
                 pintar(punto);
                 socket.emit('punto', punto);
             }
 
-            let pintar = (punto) => {
-                let divPunto = $('div.punto.' + punto.jugador);
+            const pintar = (punto) => {
+                let divPunto = $('div.punto.' + punto.color);
                 if (divPunto.length == 0) {
-                    cuadrado.append("<div class='punto {jugador}' />".replace("{jugador}", punto.jugador));
-                    divPunto = $('div.punto.' + punto.jugador);
-                    divPunto.css("background-color", punto.jugador);
+                    cuadrado.append("<div class='punto {color}' />".replace("{color}", punto.color));
+                    divPunto = $('div.punto.' + punto.color);
+                    divPunto.css("background-color", punto.color);
                 }
                 divPunto.css("left", punto.x + "px");
                 divPunto.css("top", punto.y + "px");
             }
-            
         });
     </script>
 </body>
