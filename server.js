@@ -1,3 +1,16 @@
+/* Desde la terminal de Visual Studio Code:
+Para instalar los módulos (una vez por proyecto):
+    npm install express
+    npm install http
+    npm install socket.io
+Para desplegar en local (http://localhost:5000/):
+    node server.js
+Para confirmar los cambios que has hecho:
+    git commit -am "mis cambios"
+Para subir al servidor remoto:
+    git heroku master
+*/
+
 // Cargamos los módulos de nodejs
 const express = require('express');
 const app = express();

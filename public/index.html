@@ -26,53 +26,61 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
         $(document).ready(function() {
-            const cuadrado = $('div.cuadrado');
+            const cuadrado = $('div.cuadrado'); /* se usa "const" para declarar una variable que no cambia */
             const urlParams = new URLSearchParams(window.location.search);
             const jugador = urlParams.get("jugador");
-            let miPunto = {color: jugador, x: null, y: null};
-
+            let miPunto = {color: jugador, x: null, y: null}; /* se usa "let" para declarar una variable que queremos que exista solo dentro del contexto,
+                                                                    es decir, miPunto sólo existe dentro de esta función */
             let socket = io();
+
+            //Leemos cualquier actualización de los puntos
             socket.on('puntos', function(puntos) {
-                puntos.forEach((punto) => {
+                puntos.forEach((punto) => { /* Esto es lo mismo que poner "function(punto) {", pero tiene sus ventajas */
                     if (punto.color == miPunto.color) {
                         miPunto = punto;
                     }
                     pintar(punto);
                 });
             });
+            //Leemos cualquier actualización de la bola
             socket.on('bola', function(bola) {
                 pintar(bola);
             });
 
+            //Interceptamos el click del ratón y llamamos a la función mover
             cuadrado.on("click", (e) => {
                 let offset = cuadrado.offset();
-                mover(miPunto, {x: (e.pageX - offset.left), y: (e.pageY - offset.top)});
+                mover(miPunto, e.pageX - offset.left, e.pageY - offset.top);
             });
 
+            //Interceptamos los cursores y llamamos a la función mover
             $(document).keydown((event) => {
                 switch(event.which) {
                 case 37:
-                    mover(miPunto, {x: miPunto.x-8, y: miPunto.y});
+                    mover(miPunto, miPunto.x-8, miPunto.y);
                     break;
                 case 38:
-                    mover(miPunto, {x: miPunto.x, y: miPunto.y-8});
+                    mover(miPunto, miPunto.x, miPunto.y-8);
                     break;
                 case 39:
-                    mover(miPunto, {x: miPunto.x+8, y: miPunto.y});
+                    mover(miPunto, miPunto.x+8, miPunto.y);
                     break;
                 case 40:
-                    mover(miPunto, {x: miPunto.x, y: miPunto.y+8});
+                    mover(miPunto, miPunto.x, miPunto.y+8);
                     break;
                 }
             });
 
-            const mover = function(punto, donde) {
-                punto.x = donde.x;
-                punto.y = donde.y;
+            //Función que mueve mi punto
+            const mover = function(punto, x, y) {
+                punto.x = x;
+                punto.y = y;
                 pintar(punto);
+                //Enviamos al servidor la nueva situación del punto
                 socket.emit('punto', punto);
             }
 
+            //Función que pinta un punto en la pantalla
             const pintar = (punto) => {
                 let divPunto = $('div.punto.' + punto.color);
                 if (divPunto.length == 0) {
